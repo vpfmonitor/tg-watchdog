@@ -52,6 +52,7 @@ chat_active = True
 # ====== Обробник повідомлень ======
 @dp.message()
 async def handle_messages(message: Message):
+    print("New message:", message.chat.id, message.from_user.id, message.text)
     global last_message_time, last_alert_time, chat_active
 
     if message.chat.id == CHAT_ID_SOURCE:
