@@ -15,6 +15,10 @@ TIMEOUT_SECONDS = int(os.getenv("TIMEOUT_SECONDS", "60").strip())
 CHECK_INTERVAL = int(os.getenv("CHECK_INTERVAL", "20").strip())
 ALERT_COOLDOWN = int(os.getenv("ALERT_COOLDOWN", "300").strip())
 # =========================
+print("BOT_TOKEN:", repr(BOT_TOKEN))
+print("CHAT_ID_SOURCE:", repr(CHAT_ID_SOURCE))
+print("CHAT_ID_ALERT:", repr(CHAT_ID_ALERT))
+
 
 # ====== ПЕРЕВІРКИ ENV ======
 if not BOT_TOKEN:
