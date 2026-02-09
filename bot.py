@@ -49,23 +49,44 @@ last_alert_time = 0
 # стан чату: True = чат активний, False = мовчить
 chat_active = True
 
+
+def format_duration(seconds: int) -> str:
+    """Повертає зрозумілий рядок тривалості: 'Xd Yh Zm Ss' з українськими скороченнями."""
+    seconds = int(seconds)
+    days, rem = divmod(seconds, 86400)
+    hours, rem = divmod(rem, 3600)
+    minutes, secs = divmod(rem, 60)
+
+    parts = []
+    if days:
+        parts.append(f"{days}дн")
+    if hours:
+        parts.append(f"{hours}год")
+    if minutes:
+        parts.append(f"{minutes}хв")
+    if secs or not parts:
+        parts.append(f"{secs}сек")
+
+    return " ".join(parts)
+
 # ====== Обробник повідомлень ======
 @dp.message()
 async def handle_messages(message: Message):
     print("New message:", message.chat.id, message.from_user.id, message.text)
     global last_message_time, last_alert_time, chat_active
-
     if message.chat.id == CHAT_ID_SOURCE:
+        silence_time = time.time() - last_message_time
         last_message_time = time.time()
 
         # якщо чат був у стані тиші, але з’явилося повідомлення
         if not chat_active:
             try:
+                formatted = format_duration(int(silence_time))
                 await bot.send_message(
                     CHAT_ID_ALERT,
-                    "✅ Повідомлення знову з’явилися в чаті!"
+                    f"✅ Повідомлення знову з’явилися в чаті! Час тиші: {formatted}"
                 )
-                print("Alert: чат знову активний")
+                print(f"Alert: чат знову активний, час тиші {formatted}")
             except Exception as e:
                 print("Failed to send alert:", e)
 
@@ -85,11 +106,12 @@ async def watchdog():
             # перевіряємо cooldown для алерту
             if time.time() - last_alert_time >= ALERT_COOLDOWN:
                 try:
+                    formatted = format_duration(int(silence_time))
                     await bot.send_message(
                         CHAT_ID_ALERT,
-                        f"⚠️ В чаті немає повідомлень вже {int(silence_time)} секунд"
+                        f"⚠️ В чаті немає повідомлень вже {formatted}"
                     )
-                    print(f"Alert sent: чат мовчить {int(silence_time)} секунд")
+                    print(f"Alert sent: чат мовчить {formatted}")
                 except Exception as e:
                     print("Failed to send alert:", e)
 
